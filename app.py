@@ -91,6 +91,8 @@ def get_file(file_id):
             encoded_string = base64.b64encode(image_file.read()).decode("utf-8")
     else:
         encoded_string = ""
+    file_size = os.path.getsize(file["path"])
+    readable_size = human_readable_size(file_size)
     if file:
         return (
             jsonify(
@@ -99,7 +101,7 @@ def get_file(file_id):
                     "file_name": file["file_name"],
                     "file_type": file["file_type"],
                     "description": file["description"],
-                    "file_size": os.path.getsize(file["path"]),
+                    "file_size": readable_size,
                     "uploaded_at": file["uploaded_at"],
                     "image_data": encoded_string,
                 }
