@@ -1,19 +1,20 @@
 from flask import Flask, request, jsonify, send_from_directory
 from flask_pymongo import PyMongo
 from flask_cors import CORS
+from dotenv import load_dotenv
 from bson import ObjectId
 from datetime import datetime
 import base64
 import os
 
+load_dotenv()
 
 app = Flask(__name__)
 
 CORS(app, resources={r"/*": {"origins": "*"}})
 
-app.config["MONGO_URI"] = (
-    "mongodb+srv://blueati:yj03059130*@fileuploader.gzbel.mongodb.net/file_uploader?retryWrites=true&w=majority&appName=fileuploader"
-)
+mongo_uri = os.getenv("MONGO_URI")
+app.config["MONGO_URI"] = mongo_uri
 mongo = PyMongo(app)
 db = mongo.db.files
 
