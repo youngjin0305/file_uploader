@@ -22,11 +22,13 @@ UPLOAD_FOLDER = "uploads"
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
+
 def human_readable_size(size_in_bytes):
-    for unit in ['B', 'KB', 'MB', 'GB', 'TB']:
+    for unit in ["B", "KB", "MB", "GB", "TB"]:
         if size_in_bytes < 1024:
             return f"{size_in_bytes:.2f} {unit}"
         size_in_bytes /= 1024
+
 
 # 1. 파일 업로드 엔드포인트
 @app.route("/upload", methods=["POST"])
@@ -46,7 +48,8 @@ def upload_file():
         file_id = db.insert_one(
             {
                 "file_name": file.filename,
-                "file_type": file.content_type,
+                "file_type": request.form.get("file_type", ""),
+                "content_type": file.content_type,
                 "path": file_path,
                 "description": request.form.get("description", ""),
                 "uploaded_at": upload_time,
@@ -85,7 +88,7 @@ def get_file(file_id):
         file = db.find_one({"_id": ObjectId(file_id)})
     except:
         return jsonify({"error": "Invalid file ID"}), 400
-    if file["file_type"] == "image/jpeg" or file["file_type"] == "image/png":
+    if file["content_type"] == "image/jpeg" or file["content_type"] == "image/png":
         file_path = file["path"]
         with open(file_path, "rb") as image_file:
             encoded_string = base64.b64encode(image_file.read()).decode("utf-8")
@@ -118,10 +121,10 @@ def download_file(file_id):
     file = db.find_one({"_id": ObjectId(file_id)})
     if file:
         return send_from_directory(
-            app.config["UPLOAD_FOLDER"], 
-            file["file_name"], 
-            as_attachment=True, 
-            download_name=file["file_name"]
+            app.config["UPLOAD_FOLDER"],
+            file["file_name"],
+            as_attachment=True,
+            download_name=file["file_name"],
         )
     else:
         return jsonify({"error": "파일을 찾을 수 없습니다"}), 404
